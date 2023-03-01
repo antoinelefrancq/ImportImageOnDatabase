@@ -7,18 +7,29 @@ function App() {
   const [image, setImage] = useState(null)
   const [imageSrc, setImageSrc] = useState(null);
   
+
+
+
   useEffect(()=>{
-    axios.get('http://localhost:5000/get-image/16')
+    const query = `
+      query {
+        getImage(id:21) {
+          file
+        }
+      }
+    `;
+    axios.post('http://localhost:5000/graphql',{query})
     .then(response => {
-      setImageSrc(response.data)
+      const url = response.data.data.getImage.file
+      setImageSrc(url)
     })
     .catch(error => {
       console.log(error);
     });
   },[])
 
-  const handleChange = (e) =>{
-    const file = e.target.files[0];
+  const handleChange = async(e) =>{
+    let file = e.target.files[0];
     const img = {
       preview: URL.createObjectURL(file),
       data: file,
@@ -32,11 +43,12 @@ function App() {
     formData.append('file', image.data)
     axios.post('http://localhost:5000/image', formData)
     .then((response) => {
-      console.log('image sent to server')
+      console.log(response.data);
     })
     .catch((error) => {
       console.log(error);
     });
+
   }
 
   return (
@@ -71,7 +83,7 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
       {imageSrc ? (
-          <img src={imageSrc} alt="Uploaded" width="400" height="400" />
+          <img src={imageSrc} alt={imageSrc} width="400" height="400" />
         ) : (
           <div>Loading...</div>
         )}
